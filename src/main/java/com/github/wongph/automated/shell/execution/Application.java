@@ -1,5 +1,8 @@
 package com.github.wongph.automated.shell.execution;
 
+import java.io.IOException;
+import java.util.concurrent.ExecutionException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.boot.SpringApplication;
@@ -20,9 +23,19 @@ public class Application {
 			System.out.println(beanName);
 		}
 		
-		LOGGER.info("Execute Shell Runner Service");
-		ShellRunnerService shellRunnerService = context.getBean(ShellRunnerService.class);
-		shellRunnerService.autoExecuteJob();
+		
+		MultiThreadService multiThreadService = context.getBean(MultiThreadService.class);
+		try {
+			LOGGER.info("Execute Multi Thread Service");
+			multiThreadService.executeConcurrentRequests();
+		} catch (InterruptedException | ExecutionException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		
+
+		
 	}
 	
 	

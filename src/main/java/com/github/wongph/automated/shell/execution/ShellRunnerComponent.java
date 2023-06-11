@@ -21,7 +21,6 @@ public class ShellRunnerComponent {
 	private Process process;
 	
 	
-	
 	public void executeCommand(String[] commands) {
 		LOGGER.info("execute: {}", Arrays.toString(commands));
 		
@@ -44,8 +43,12 @@ public class ShellRunnerComponent {
 		try {
 			outputStream.write(inputBytes);
 			outputStream.flush();
+			Thread.sleep(1000);
 		} catch (IOException ioe) {
 			LOGGER.error("IOException", ioe);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			LOGGER.error("InterruptedException", e);
 		}
 	}
 	
