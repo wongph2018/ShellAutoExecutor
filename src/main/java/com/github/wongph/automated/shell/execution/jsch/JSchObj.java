@@ -14,6 +14,7 @@ public class JSchObj {
 	private String host;
 	private String username;
 	private String password;
+	private String keyPath;
 	private String schema;
 	private List<String> runCommands;
 	private JsonObj jsonObj;
@@ -27,6 +28,7 @@ public class JSchObj {
 		this.host = jSchObjBuilder.host;
 		this.username = jSchObjBuilder.username;
 		this.password = jSchObjBuilder.password;
+		this.keyPath = jSchObjBuilder.keyPath;
 		this.schema = jSchObjBuilder.schema;
 		this.runCommands = jSchObjBuilder.runCommands;
 		this.jsonObj = jSchObjBuilder.jsonObj;
@@ -58,6 +60,14 @@ public class JSchObj {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public String getKeyPath() {
+		return keyPath;
+	}
+
+	public void setKeyPath(String keyPath) {
+		this.keyPath = keyPath;
 	}
 
 	public String getSchema() {
@@ -103,6 +113,7 @@ public class JSchObj {
 		private String host;
 		private String username;
 		private String password;
+		private String keyPath;
 		private String schema;
 		private List<String> runCommands;
 		private JsonObj jsonObj;
@@ -125,6 +136,10 @@ public class JSchObj {
 		}
 		public JSchObjBuilder password(String password) {
 			this.password = password;
+			return this;
+		}
+		public JSchObjBuilder keyPath(String keyPath) {
+			this.keyPath = keyPath;
 			return this;
 		}
 		public JSchObjBuilder schema(String schema) {

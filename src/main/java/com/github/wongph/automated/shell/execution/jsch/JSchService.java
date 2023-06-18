@@ -1,8 +1,11 @@
 package com.github.wongph.automated.shell.execution.jsch;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PipedInputStream;
 import java.io.PrintStream;
@@ -19,10 +22,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.github.wongph.automated.shell.execution.utils.FormattingUtils;
+import com.github.wongph.automated.shell.execution.xml.XmlService;
 import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.ChannelShell;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 
 @Service
 public class JSchService {
@@ -33,6 +39,9 @@ public class JSchService {
 	@Autowired
 	private JSchComponent jSchComponent;
 	
+	@Autowired
+	private XmlService xmlService;
+	
 	public String runJobFlow(JSchObj jSchObj) {
 		Session session = null;
 		ChannelShell channel = null;
@@ -41,6 +50,7 @@ public class JSchService {
 		try {
 			connectSSH();
 			//run something
+			editXMLProperties();
 			
 			session = jSchObj.getSession();
 			channel = (ChannelShell) jSchObj.getChannel();
@@ -64,11 +74,11 @@ public class JSchService {
 		JSchObj JSchObj = threadLocal.get();
 		String host = JSchObj.getHost();
 		String username = JSchObj.getUsername();
-		String pwd = JSchObj.getPassword();
+		String key = JSchObj.getKeyPath();
 		
 		try {
 			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-			session = createSession(host, username, pwd);
+			session = createSession(host, username, key);
 			session.connect();
 			channel = (ChannelShell) createChannel(session, "shell");
 			channel.setOutputStream(outputStream);
@@ -82,10 +92,54 @@ public class JSchService {
 
 	}
 	
-	public Session createSession(String host, String username, String pwd) {
+	public void editXMLProperties() {
+		LOGGER.info("editXMLProperties");
+		JSchObj JSchObj = threadLocal.get();
+		Session session = JSchObj.getSession();
+		ChannelSftp sftpChannel = null;
+		
+		try {
+			sftpChannel = (ChannelSftp) createChannel(session, "sftp");
+			sftpChannel.connect();
+			String lpwd = sftpChannel.lpwd();
+			LOGGER.info("lpwd : {}", lpwd);
+			
+			String pwd = sftpChannel.pwd();
+			LOGGER.info("pwd : {}", pwd);
+			
+			sftpChannel.cd("properties");
+			
+			pwd = sftpChannel.pwd();
+			LOGGER.info("pwd : {}", pwd);
+			
+			sftpChannel.get("XML NAME", "PATH TO DOWNLOAD");
+			File xmlFile = new File("LOCAL XML PATH");
+			String modifiedPath = xmlService.modifyXml(xmlFile);
+			sftpChannel.put(modifiedPath, "PATH TO UPLOAD");
+			sftpChannel.exit();
+			
+		} catch (SftpException e) {
+			LOGGER.error("Exception in editXMLProperties", e);
+		} catch (JSchException e) {
+			LOGGER.error("Exception in editXMLProperties", e);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if(sftpChannel != null) {
+				sftpChannel.exit();
+			}
+		}
+
+		
+		
+		
+	}
+	
+	public Session createSession(String host, String username, String keyPath) {
 		Session session = null;
 		try {
-			session = jSchComponent.getSession(host, username, pwd);
+			session = jSchComponent.getSession(host, username, keyPath);
 			
 		} catch (JSchException e) {
 			LOGGER.error("JSchException", e);

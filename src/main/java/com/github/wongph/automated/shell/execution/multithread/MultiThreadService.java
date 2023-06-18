@@ -11,6 +11,7 @@ import java.util.concurrent.Future;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -22,26 +23,13 @@ public class MultiThreadService {
 	
 	private static Logger LOGGER = LogManager.getLogger(MultiThreadService.class);
 	
-	private static final String SSH_HOST = "";
-	private static final String SSH_LOGIN = "";
-	private static final String SSH_PWD = "";
-	private static final String SCHEMA = "";
-	
-	private static final String SSH_LOGIN2 = "";
-	private static final String SSH_PWD2 = "";
-	private static final String SCHEMA2 = "";
-	
-	private static final String SSH_LOGIN3 = "";
-	private static final String SSH_PWD3 = "";
-	private static final String SCHEMA3 = "";
-	
-	private static final String SSH_LOGIN4 = "";
-	private static final String SSH_PWD4 = "";
-	private static final String SCHEMA4 = "";
-	
 	
 	@Autowired
 	private JSchService jSchService;
+	
+	@Autowired
+	private Environment env;
+
 	
 	@Async
 	public void executeConcurrentRequests() throws InterruptedException, ExecutionException {
@@ -56,7 +44,7 @@ public class MultiThreadService {
 		}
 		
 		// Create an executor service with a thread pool
-        ExecutorService executorService = Executors.newFixedThreadPool(3);
+        ExecutorService executorService = Executors.newFixedThreadPool(1);
         
         // Submit the tasks and obtain a list of futures
         List<Future<String>> futures = executorService.invokeAll(tasks);
@@ -71,41 +59,53 @@ public class MultiThreadService {
 	}
 	
 	private List<JSchObj> hardcodeJSchList() {
+		
+		final String SSH_HOST = env.getProperty("hostname");
+		final String KEY_PATH = env.getProperty("key.path");
+		
+		final String SSH_LOGIN = env.getProperty("username.1");
+		
+		final String SSH_LOGIN2 = env.getProperty("username.2");
+		
+		final String SSH_LOGIN3 = env.getProperty("username.3");
+		
+		final String SSH_LOGIN4 = env.getProperty("username.4");
+		
 		List<JSchObj> jSchObjList = new ArrayList<>();
 		
-//		JSchObj j1 = new JSchObj.JSchObjBuilder()
-//				.host(SSH_HOST)
-//				.username(SSH_LOGIN)
-//				.password(SSH_PWD)
-//				.schema(SCHEMA)
-//				.build();
+		JSchObj j1 = new JSchObj.JSchObjBuilder()
+				.host(SSH_HOST)
+				.username(SSH_LOGIN)
+				.keyPath(KEY_PATH)
+				.build();
+		
 		
 		JSchObj j2 = new JSchObj.JSchObjBuilder()
 				.host(SSH_HOST)
 				.username(SSH_LOGIN2)
-				.password(SSH_PWD2)
-				.schema(SCHEMA2)
+				.keyPath(KEY_PATH)
 				.build();
 		
 		JSchObj j3 = new JSchObj.JSchObjBuilder()
 				.host(SSH_HOST)
 				.username(SSH_LOGIN3)
-				.password(SSH_PWD3)
-				.schema(SCHEMA3)
+				.keyPath(KEY_PATH)
 				.build();
 		
 		JSchObj j4 = new JSchObj.JSchObjBuilder()
 				.host(SSH_HOST)
 				.username(SSH_LOGIN4)
-				.password(SSH_PWD4)
-				.schema(SCHEMA4)
+				.keyPath(KEY_PATH)
 				.build();
 		
-//		jSchObjList.add(j1);
-		jSchObjList.add(j2);
-		jSchObjList.add(j3);
-		jSchObjList.add(j4);
+		jSchObjList.add(j1);
+//		jSchObjList.add(j2);
+//		jSchObjList.add(j3);
+//		jSchObjList.add(j4);
 		
+		
+
+
 		
 		
 		return jSchObjList;

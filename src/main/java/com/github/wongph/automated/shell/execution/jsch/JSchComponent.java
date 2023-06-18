@@ -28,9 +28,9 @@ public class JSchComponent {
 		jsch = new JSch();
 	}
 	
-	public Session getSession(String host, String username, String pwd) throws JSchException {
+	public Session getSession(String host, String username, String keyPath) throws JSchException {
 		Session session = jsch.getSession(username, host, 22);
-		session.setPassword(pwd);
+		jsch.addIdentity(keyPath);
     	session.setConfig("PreferredAuthentications", "publickey,keyboard-interactive,password");
     	session.setConfig("StrictHostKeyChecking", "no"); // disable check for RSA key
         return session;
